@@ -1,5 +1,7 @@
 #!/system/bin/sh
 
+sleep 20
+
 brevent=me.piebridge.brevent
 lnld=`dumpsys package $brevent | grep legacyNativeLibraryDir`
 if [ x"$lnld" == x"" ]; then
