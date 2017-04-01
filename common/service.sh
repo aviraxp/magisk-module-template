@@ -1,7 +1,19 @@
 #!/system/bin/sh
-# Please don't hardcode /magisk/modname/... ; instead, please use $MODDIR/...
-# This will make your scripts compatible even if Magisk change its mount point in the future
-MODDIR=${0%/*}
 
-# This script will be executed in late_start service mode
-# More info in the main Magisk thread
+brevent=me.piebridge.brevent
+lnld=`dumpsys package $brevent | grep legacyNativeLibraryDir`
+if [ x"$lnld" == x"" ]; then
+    echo "please install $brevent" >&2
+    exit 1
+else
+    lib=`echo $lnld | dd bs=1 skip=23 2>/dev/null`
+    path=`ls $lib/*/libbrevent.so`
+    if [ ! -f "$path" ]; then
+        echo "please install latest $brevent" >&2
+        exit 1
+    else
+        echo "exec $path"
+        exec $path
+        exit 0
+    fi
+fi
