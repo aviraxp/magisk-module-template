@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-sleep 20
+sleep 30
 
 brevent=me.piebridge.brevent
 lnld=`dumpsys package $brevent | grep legacyNativeLibraryDir`
