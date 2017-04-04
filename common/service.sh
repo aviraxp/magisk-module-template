@@ -1,6 +1,7 @@
 #!/system/bin/sh
 
-while [ `getprop sys.boot_completed` = 0 ]
+#while [ `getprop sys.boot_completed` = 0 ]
+while [ `getprop init.svc.bootanim` != "stopped" ]
 do
 sleep 2
 done
