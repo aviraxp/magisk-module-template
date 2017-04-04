@@ -1,16 +1,33 @@
 #!/system/bin/sh
 
-#while [ `getprop sys.boot_completed` = 0 ]
 while [ `getprop init.svc.bootanim` != "stopped" ]
 do
-sleep 2
+sleep 1
 done
-cp -f `dumpsys package me.piebridge.brevent | grep legacyNativeLibraryDir | cut -b 28-`/*/libbrevent.so /data/local/tmp/brevent
-if [ -f /system/bin/app_process64 ]
-then
-ln -sf /system/bin/app_process64 /data/local/tmp/app_process
+
+package=me.piebridge.brevent
+brevent=/data/local/tmp/brevent
+lnld=`dumpsys package $package | grep legacyNativeLibraryDir`
+if [ x"$lnld" == x"" ]; then
+    echo "please install $package" >&2
+    exit 1
 else
-ln -sf /system/bin/app_process32 /data/local/tmp/app_process
+    lib=`echo $lnld | dd bs=1 skip=23 2>/dev/null`
+    path=`ls $lib/*/libbrevent.so`
+    if [ ! -f "$path" ]; then
+        echo "please install latest $package" >&2
+        exit 1
+    else
+        rm -rf $brevent
+        cp $path $brevent
+        if echo $path | grep -q -v 64; then
+            rm -rf /data/local/tmp/app_process
+            if [ -x /system/bin/app_process32 ]; then
+                ln -s /system/bin/app_process32 /data/local/tmp/app_process
+                export PATH=/data/local/tmp:$PATH
+            fi
+        fi
+        exec $brevent
+        exit 0
+    fi
 fi
-export PATH=/data/local/tmp:$PATH
-exec /data/local/tmp/brevent
